@@ -12,6 +12,7 @@ django = "^4.2.7"
 pillow = "^10.1.0"
 djangorestframework = "^3.14.0"
 python-dotenv = "^1.0.0"
+psycopg2-binary = "^2.9.9"
 
 
 [build-system]
