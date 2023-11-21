@@ -59,7 +59,7 @@ class SULessonTestCase(APITestCase):
 
     def test_lesson_create(self):
         """
-        Test for creating lesson  for admin.
+        Test for creating lesson for admin.
         """
         data = {
             'title': 'test1',
@@ -83,6 +83,31 @@ class SULessonTestCase(APITestCase):
 
         self.assertTrue(
             response.json()['owner'] == self.user.pk
+        )
+
+    def test_lesson_create_validation_error(self):
+        """
+        Test(validation error) for creating lesson for admin.
+        """
+        data = {
+            'title': 'test3',
+            'description': 'test3',
+            'video_url': 'https://rutube.ru/video/c6cc4d620b1d4338901770a44b3e82f4/'
+        }
+
+        response = self.client.post(
+            reverse('materials:lesson-create'),
+            data=data
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+
+        self.assertEqual(
+            response.json(),
+            {'non_field_errors': ['Видео может быть только с YouTube']}
         )
 
     def test_lesson_retrieve(self):
