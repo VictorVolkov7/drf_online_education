@@ -5,7 +5,7 @@ from rest_framework import routers
 
 from materials.views import CourseViewSet, LessonCreateAPIView, LessonListAPIView, LessonRetrieveAPIView, \
     LessonUpdateAPIView, LessonDestroyAPIView, PaymentsListAPIView, SubscriptionCreateAPIView, \
-    SubscriptionDestroyApiView
+    SubscriptionDestroyApiView, LessonBuyAPIView, CourseBuyAPIView
 
 app_name = MaterialsConfig.name
 
@@ -24,5 +24,10 @@ urlpatterns = [
 
     # subscription
     path('course/<int:pk>/subscribe/', SubscriptionCreateAPIView.as_view(), name='course-subscribe'),
-    path('course/<int:pk>/unsubscribe/', SubscriptionDestroyApiView.as_view(), name='course-unsubscribe')
+    path('course/<int:pk>/unsubscribe/', SubscriptionDestroyApiView.as_view(), name='course-unsubscribe'),
+
+    # stipe payment
+    path('lesson/<int:pk>/buy/', LessonBuyAPIView.as_view(), name='create-payment'),
+    path('course/<int:pk>/buy/', CourseBuyAPIView.as_view(), name='create-payment'),
+
 ] + router.urls

@@ -4,11 +4,13 @@ from rest_framework import generics, viewsets, status
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from materials.models import Course, Lesson, Payments, Subscription
 from materials.paginators import MyPagination
 from materials.permissions import IsModerator, IsMaterialsOwner
 from materials.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
+from materials.services import stripe_payment_created
 from users.models import UserRole
 
 
@@ -50,6 +52,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
         new_lesson = serializer.save()
         new_lesson.owner = self.request.user
         new_lesson.save()
+        return super().perform_create(serializer)
 
 
 class LessonListAPIView(generics.ListAPIView):
@@ -107,3 +110,33 @@ class SubscriptionDestroyApiView(generics.DestroyAPIView):
         subscription = get_object_or_404(Subscription, user=request.user, course=course)
         self.perform_destroy(subscription)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LessonBuyAPIView(APIView):
+    permission_classes = [IsAuthenticated | IsAdminUser]
+
+    def post(self, *args, **kwargs):
+        lesson = get_object_or_404(Lesson, pk=kwargs.get('pk'))
+
+        lesson_name = lesson.title
+        lesson_price = lesson.price
+        user = self.request.user.pk
+
+        stripe_session = stripe_payment_created(lesson_name, lesson_price, user)
+
+        return Response({"Payment url": f"{stripe_session.url}"}, status=status.HTTP_200_OK)
+
+
+class CourseBuyAPIView(APIView):
+    permission_classes = [IsAuthenticated | IsAdminUser]
+
+    def post(self, *args, **kwargs):
+        course = get_object_or_404(Course, pk=kwargs.get('pk'))
+
+        course_name = course.title
+        course_price = course.price
+        user = self.request.user.pk
+
+        stripe_session = stripe_payment_created(course_name, course_price, user)
+
+        return Response({"Payment url": f"{stripe_session.url}"}, status=status.HTTP_200_OK)
