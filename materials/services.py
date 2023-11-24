@@ -1,6 +1,8 @@
 import os
 
 import stripe
+from django.conf import settings
+from django.core.mail import send_mail
 
 
 def stripe_payment_created(material_name, material_price, user):
@@ -28,3 +30,12 @@ def stripe_payment_created(material_name, material_price, user):
         client_reference_id=user,
     )
     return session
+
+
+def send_email(course, users):
+    send_mail(
+        subject=f'Курс {course} обновлен',
+        message='Произошло обновление курса, зайдите и посмотрите!',
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[users],
+    )

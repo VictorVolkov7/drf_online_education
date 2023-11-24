@@ -14,5 +14,4 @@ class IsMaterialsOwner(BasePermission):
     message = 'Вы не являетесь владельцем!'
 
     def has_object_permission(self, request, view, obj):
-        return request.user.pk == obj.pk
-
+        return request.user.pk == obj.owner.pk
