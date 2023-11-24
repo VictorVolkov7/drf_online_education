@@ -11,17 +11,13 @@ from materials.paginators import MyPagination
 from materials.permissions import IsModerator, IsMaterialsOwner
 from materials.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
 from materials.services import stripe_payment_created
+from materials.tasks import subscription_send_mail
 from users.models import UserRole
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     pagination_class = MyPagination
-
-    def perform_create(self, serializer):
-        new_course = serializer.save()
-        new_course.owner = self.request.user
-        new_course.save()
 
     def get_permissions(self):
         if self.action == 'create':
@@ -42,6 +38,18 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Course.objects.filter(owner=self.request.user)
         else:
             return Course.objects.all()
+
+    def perform_create(self, serializer):
+        new_course = serializer.save()
+        new_course.owner = self.request.user
+        new_course.save()
+
+    def perform_update(self, serializer):
+        updated_course = serializer.save()
+        subscription = Subscription.objects.get(course=updated_course.pk)
+        sub_users = subscription.user.email
+        course_name = updated_course.title
+        subscription_send_mail.delay(course_name, sub_users)
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
