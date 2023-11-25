@@ -159,3 +159,10 @@ SIMPLE_JWT = {
 
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
+CELERY_BEAT_SCHEDULE = {
+    'check_last_session': {
+        'task': 'materials.tasks.check_last_session',
+        'schedule': timedelta(hours=24),
+    },
+}
