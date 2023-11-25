@@ -12,6 +12,7 @@ def subscription_send_mail(course, users):
     send_email(course, users)
 
 
+@shared_task
 def check_last_session():
     current_date = timezone.now()
     four_months_ago = current_date - timedelta(days=120)
